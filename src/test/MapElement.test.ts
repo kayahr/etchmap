@@ -40,6 +40,7 @@ describe("MapElement", () => {
     describe("attributeChangedCallback", () => {
         it("applies complete declarative options before connecting", () => {
             const element = document.createElement("kayahr-map");
+            element.setAttribute("attribution-prefix", "false");
             element.setAttribute("center-x", "6.9603");
             element.setAttribute("center-y", "50.9375");
             element.setAttribute("cover-viewport", "false");
@@ -64,6 +65,7 @@ describe("MapElement", () => {
             document.body.append(element);
 
             const component = element.getComponent();
+            assertSame(component.attributionPrefix, false);
             assertCloseTo(component.center, { x: 6.9603, y: 50.9375 }, 8);
             assertSame(component.coverViewport, false);
             assertSame(component.maxZoom, 24);
@@ -82,6 +84,28 @@ describe("MapElement", () => {
             const attribution = element.shadowRoot?.querySelector(".attribution");
             assertInstanceOf(attribution, HTMLDivElement);
             assertSame(attribution.innerHTML, "");
+            element.remove();
+        });
+
+        it("restores the default attribution prefix when its attribute is removed", async () => {
+            const element = document.createElement("kayahr-map");
+            element.setAttribute("attribution-prefix", "<b>Custom map engine</b>");
+            element.setAttribute("source", JSON.stringify({ tileURL: "https://example.com/{z}/{x}/{y}.png" }));
+            document.body.append(element);
+
+            const component = element.getComponent();
+            assertSame(component.attributionPrefix, "<b>Custom map engine</b>");
+            const attribution = element.shadowRoot?.querySelector(".attribution");
+            assertInstanceOf(attribution, HTMLDivElement);
+            assertSame(attribution.innerHTML, "<b>Custom map engine</b>");
+
+            element.removeAttribute("attribution-prefix");
+            await Promise.resolve();
+
+            assertSame(attribution.textContent, "Powered by EtchMap");
+            const link = attribution.querySelector("a");
+            assertInstanceOf(link, HTMLAnchorElement);
+            assertSame(link.href, "https://github.com/kayahr/etchmap");
             element.remove();
         });
 
@@ -282,8 +306,8 @@ describe("MapElement", () => {
             assertSame(component.source.tileURL, "https://example.com/{z}/{x}/{y}.png");
             const attribution = element.shadowRoot?.querySelector(".attribution");
             assertInstanceOf(attribution, HTMLDivElement);
-            assertSame(attribution.textContent, "Custom tiles by Example Maps");
-            const link = attribution.querySelector("a");
+            assertSame(attribution.textContent, "Powered by EtchMap | Custom tiles by Example Maps");
+            const link = attribution.querySelector("a[href='https://example.com/copyright']");
             assertInstanceOf(link, HTMLAnchorElement);
             assertSame(link.href, "https://example.com/copyright");
             element.remove();

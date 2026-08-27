@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { LinearProjection, MapComponent, type TileSource } from "@kayahr/map";
+import { LinearProjection, MapComponent, type TileSource } from "@kayahr/etchmap";
 
 const source: TileSource = {
     attribution: "© <a href=\"https://www.arena.net/en/legal/content-terms-of-use\" target=\"_blank\" rel=\"noopener noreferrer\">ArenaNet, LLC.</a>",

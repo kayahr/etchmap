@@ -2,6 +2,7 @@ Barsky
 Chelyabinsk
 crossfade
 dests
+etchmap
 geofence
 geofences
 importmap
@@ -23,7 +24,6 @@ ntest
 nums
 openlayers
 openstreetmap
-osmap
 oxlint
 pointercancel
 pointerdown

@@ -23,7 +23,7 @@ Slotted HTML overlays receive their ordinary native pointer events. Map pointer 
 Listen on the element owned by a `MapComponent`. Merely observing an event does not interfere with the built-in map interactions.
 
 ```ts
-import { MapComponent } from "@kayahr/map";
+import { MapComponent } from "@kayahr/etchmap";
 
 const map = new MapComponent({
     center: { x: 6.9603, y: 50.9375 },
@@ -68,7 +68,7 @@ Call `preventDefault()` on `map-pointerdown` when application code should handle
 This example lets one pointer drag a custom location without moving the map:
 
 ```ts
-import { MapComponent, type MapPointerEvent } from "@kayahr/map";
+import { MapComponent, type MapPointerEvent } from "@kayahr/etchmap";
 
 const map = new MapComponent({
     center: { x: 6.9603, y: 50.9375 },

@@ -1,4 +1,6 @@
-# @kayahr/map
+# EtchMap
+
+[GitHub] | [NPM] | [API Doc]
 
 A browser library for smooth interactive XYZ raster-tile maps like [OpenStreetMap].
 
@@ -17,7 +19,7 @@ Import the package module, give the element a CSS size, and specify the initial 
 
 ```html
 <script type="module">
-  import "@kayahr/map";
+  import "@kayahr/etchmap";
 </script>
 
 <style>
@@ -35,7 +37,7 @@ JavaScript can access the complete component API of a declaratively created map 
 ## Programmatic creation
 
 ```ts
-import { MapComponent } from "@kayahr/map";
+import { MapComponent } from "@kayahr/etchmap";
 
 const map = new MapComponent({
     center: { x: 6.9603, y: 50.9375 },
@@ -63,10 +65,13 @@ document.body.append(map.getElement());
 - [Map input events](doc/input-events.md)
 - [Tile sources and projections](doc/sources.md)
 
+[API Doc]: https://kayahr.github.io/etchmap/
+[GitHub]: https://github.com/kayahr/etchmap/
+[NPM]: https://www.npmjs.com/package/@kayahr/etchmap/
 [Canvas]: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
-[Flights demo]: https://kayahr.github.io/map/demo/flights.html
-[GW2 demo]: https://kayahr.github.io/map/demo/gw2.html
+[Flights demo]: https://kayahr.github.io/etchmap/demo/flights.html
+[GW2 demo]: https://kayahr.github.io/etchmap/demo/gw2.html
 [Guild Wars 2 map API]: https://wiki.guildwars2.com/wiki/API:Maps
-[Simple demo]: https://kayahr.github.io/map/demo/simple.html
+[Simple demo]: https://kayahr.github.io/etchmap/demo/simple.html
 [Web Mercator]: https://en.wikipedia.org/wiki/Web_Mercator_projection
 [OpenStreetMap]: https://www.openstreetmap.org/

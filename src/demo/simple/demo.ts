@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import "@kayahr/map";
+import "@kayahr/etchmap";
 
 const cathedral = { x: 6.9583, y: 50.9413 };
 const element = document.querySelector("kayahr-map")!;

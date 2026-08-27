@@ -1,6 +1,6 @@
 {
     "$schema": "https://json.schemastore.org/package",
-    "name": "@kayahr/map",
+    "name": "@kayahr/etchmap",
     "version": "0.1.0",
     "type": "module",
     "description": "A small dependency-free browser library for smooth interactive raster-tile maps",
@@ -23,10 +23,10 @@
     ],
     "license": "MIT",
     "author": "Klaus Reimer <k@ailis.de>",
-    "repository": "github:kayahr/map",
-    "homepage": "https://github.com/kayahr/map",
-    "bugs": "https://github.com/kayahr/map/issues",
-    "funding": "https://github.com/kayahr/map?sponsor=1",
+    "repository": "github:kayahr/etchmap",
+    "homepage": "https://github.com/kayahr/etchmap",
+    "bugs": "https://github.com/kayahr/etchmap/issues",
+    "funding": "https://github.com/kayahr/etchmap?sponsor=1",
     "publishConfig": {
         "access": "public"
     },
@@ -50,7 +50,7 @@
         "test:lint": "oxlint --type-aware --deny-warnings",
         "test:apidoc": "typedoc --emit none",
         "test:spell": "cspell --no-progress --no-summary",
-        "apidoc": "run apidoc:typedoc apidoc:demo",
+        "apidoc": "run apidoc:*",
         "apidoc:demo": "node src/demo/esbuild.js",
         "apidoc:typedoc": "typedoc",
         "prepare": "run clean build"

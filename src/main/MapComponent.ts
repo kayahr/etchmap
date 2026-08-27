@@ -88,6 +88,9 @@ export const connectMapComponent = Symbol("connectMapComponent");
 /** Symbol-keyed lifecycle method which disconnects a map component from its element and document. */
 export const disconnectMapComponent = Symbol("disconnectMapComponent");
 
+/** Default trusted HTML displayed before the tile-source attribution. */
+const defaultAttributionPrefix = "Powered by <a href=\"https://github.com/kayahr/etchmap\" target=\"_blank\" rel=\"noopener noreferrer\">EtchMap</a>";
+
 /** Shadow-DOM stylesheet shared by every map component. No template string used here for better minimization. */
 const styles =
     ":host{" +
@@ -144,6 +147,9 @@ const styles =
 
 /** Options used when creating a map component. */
 export interface MapOptions {
+    /** Trusted HTML displayed before the tile-source attribution, or `false` to omit it. Defaults to a linked `Powered by EtchMap`. */
+    readonly attributionPrefix?: string | false;
+
     /** Maximum positive integer number of ready tile images retained in memory. Defaults to 512. */
     readonly cacheSize?: number;
 
@@ -254,6 +260,9 @@ export class MapComponent {
     /** Element displaying the current tile-source attribution. */
     readonly #attribution: HTMLDivElement;
 
+    /** Trusted HTML displayed before the tile-source attribution, or `false` when omitted. */
+    #attributionPrefix: string | false;
+
     /** Maximum number of ready tile images retained in memory. */
     #cacheSize: number;
 
@@ -328,6 +337,7 @@ export class MapComponent {
      * @throws {@link !TypeError} When the tile source is malformed.
      */
     public constructor(options: MapOptions = {}) {
+        this.#attributionPrefix = options.attributionPrefix ?? defaultAttributionPrefix;
         const cacheSize = options.cacheSize ?? 512;
         assertPositiveInteger(cacheSize, "cacheSize");
         this.#cacheSize = cacheSize;
@@ -387,6 +397,30 @@ export class MapComponent {
                 this.#resize(entry.contentRect.width, entry.contentRect.height, deviceSize?.inlineSize, deviceSize?.blockSize);
             }
         });
+    }
+
+    /**
+     * Trusted HTML displayed before the tile-source attribution.
+     *
+     * @returns Current attribution prefix, or `false` when omitted.
+     */
+    public get attributionPrefix(): string | false {
+        return this.#attributionPrefix;
+    }
+
+    /**
+     * Changes the HTML displayed before the tile-source attribution.
+     *
+     * The string is inserted as trusted HTML without sanitization. It must never contain untrusted input.
+     *
+     * @param attributionPrefix - New trusted HTML, `false` to omit the prefix, or `null` to restore the default linked `Powered by EtchMap` prefix.
+     */
+    public set attributionPrefix(attributionPrefix: string | false | null) {
+        const resolvedPrefix = attributionPrefix ?? defaultAttributionPrefix;
+        if (resolvedPrefix !== this.#attributionPrefix) {
+            this.#attributionPrefix = resolvedPrefix;
+            this.#updateAttribution();
+        }
     }
 
     /**
@@ -1009,7 +1043,9 @@ export class MapComponent {
 
     /** Updates the visible attribution from the current tile source. */
     #updateAttribution(): void {
-        this.#attribution.innerHTML = this.#source.attribution;
+        const prefix = this.#attributionPrefix === false ? "" : this.#attributionPrefix;
+        const separator = prefix.length > 0 && this.#source.attribution.length > 0 ? " | " : "";
+        this.#attribution.innerHTML = `${prefix}${separator}${this.#source.attribution}`;
     }
 
     /** Positions the attribution at the bottom-right corner of the visible tile coverage. */

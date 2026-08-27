@@ -270,6 +270,26 @@ describe("MapComponent", () => {
     });
 
     describe("attribution", () => {
+        it("configures its prefix independently of the tile-source attribution", () => {
+            const component = new MapComponent({
+                attributionPrefix: false,
+                source: {
+                    attribution: "<b>Example Maps</b>",
+                    tileURL: "https://example.com/{z}/{x}/{y}.png"
+                }
+            });
+            const attribution = component.getElement().shadowRoot?.querySelector(".attribution");
+            assertInstanceOf(attribution, HTMLDivElement);
+            assertSame(component.attributionPrefix, false);
+            assertSame(attribution.innerHTML, "<b>Example Maps</b>");
+
+            component.attributionPrefix = "Rendered by <i>Custom Engine</i>";
+            assertSame(attribution.innerHTML, "Rendered by <i>Custom Engine</i> | <b>Example Maps</b>");
+
+            component.attributionPrefix = null;
+            assertSame(attribution.textContent, "Powered by EtchMap | Example Maps");
+        });
+
         it("stays at the bottom-right corner of the visible tile coverage", () => {
             const component = new MapComponent({
                 center: { x: 0, y: 0 },

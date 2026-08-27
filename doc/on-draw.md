@@ -43,7 +43,7 @@ Returning `true` requests another frame and is useful for application animations
 This example draws the naturally projected route from Cologne to Bonn over the map. `projectPolyline()` performs viewport clipping and may return multiple visible runs, so each returned line is drawn separately.
 
 ```ts
-import { MapComponent } from "@kayahr/map";
+import { MapComponent } from "@kayahr/etchmap";
 
 const map = new MapComponent({
     center: { x: 7.03, y: 50.84 },
@@ -84,7 +84,7 @@ The margin accounts for half the line width, so the route remains visible while 
 Returning `true` keeps producing frames. This example draws a time-based pulse around Cologne Cathedral while it is visible. Returning `false` when it is offscreen stops unnecessary animation frames; normal map interaction invokes the callback again and restarts the animation when the location becomes visible.
 
 ```ts
-import { MapComponent, isClippedPoint } from "@kayahr/map";
+import { MapComponent, isClippedPoint } from "@kayahr/etchmap";
 
 const cathedral = { x: 6.9583, y: 50.9413 };
 const map = new MapComponent({ center: cathedral, zoom: 14 });
@@ -121,7 +121,7 @@ Direct children of `<kayahr-map>` are slotted into its HTML overlay layer and po
 
 ```html
 <script type="module">
-  import { MapElement, isClippedPoint } from "@kayahr/map";
+  import { MapElement, isClippedPoint } from "@kayahr/etchmap";
 
   const element = document.querySelector("kayahr-map");
   if (!(element instanceof MapElement)) {

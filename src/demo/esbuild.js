@@ -15,7 +15,7 @@ const demoDir = join(projectDir, "lib/apidoc/demo");
 const importMapScript = `    <script type="importmap">
       {
         "imports": {
-          "@kayahr/map": "./kayahr-map.js"
+          "@kayahr/etchmap": "./kayahr-etchmap.js"
         }
       }
     </script>`;
@@ -43,7 +43,7 @@ await mkdir(demoDir, { recursive: true });
 
 await build({
     entryPoints: [ join(libDir, "main/index.js") ],
-    outfile: join(demoDir, "kayahr-map.js"),
+    outfile: join(demoDir, "kayahr-etchmap.js"),
     bundle: true,
     format: "esm",
     legalComments: "none",

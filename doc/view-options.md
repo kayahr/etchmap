@@ -4,12 +4,13 @@ title: View options
 
 # View options
 
-View options configure the initial camera center and zoom, the permitted zoom range and whether the map must fill the viewport. They can be specified programmatically through `MapOptions` or declaratively through attributes on `<kayahr-map>`.
+View options configure the initial camera, its constraints and view-specific presentation such as the attribution prefix. They can be specified programmatically through `MapOptions` or declaratively through attributes on `<kayahr-map>`.
 
 Pass the initial view and its constraints to `MapComponent`:
 
 ```ts
 const map = new MapComponent({
+    attributionPrefix: false,
     center: { x: 6.9603, y: 50.9375 },
     coverViewport: false,
     maxZoom: 18,
@@ -22,6 +23,7 @@ For declarative configuration the custom element provides equivalent HTML attrib
 
 ```html
 <kayahr-map
+  attribution-prefix="false"
   center-x="6.9603"
   center-y="50.9375"
   cover-viewport="false"
@@ -49,6 +51,24 @@ At a view zoom equal to the source's `minZoom`, one logical source-tile pixel oc
 
 By default, `MapOptions.coverViewport` raises the effective minimum zoom as necessary to prevent unused space above and below the tile coverage, and also at its sides for a non-wrapping source. Set it to `false` or use `cover-viewport="false"` declaratively to permit this empty space. The effective minimum never exceeds the configured view maximum.
 
+## Attribution prefix
+
+By default, the source attribution is preceded by a linked `Powered by EtchMap` prefix. Set `MapOptions.attributionPrefix` to `false`, or use `attribution-prefix="false"` declaratively, to omit only this prefix. The attribution required by the tile source remains visible.
+
+A custom prefix is inserted as trusted HTML without sanitization. Define it only from application-controlled content:
+
+```ts
+const map = new MapComponent({
+    attributionPrefix: 'Rendered with <a href="https://example.com/map">My map engine</a>'
+});
+```
+
+The equivalent declarative value is the literal contents of the `attribution-prefix` attribute:
+
+```html
+<kayahr-map attribution-prefix='Rendered with <a href="https://example.com/map">My map engine</a>'></kayahr-map>
+```
+
 ## Changing view options
 
-The `center`, `zoom`, `minZoom`, `maxZoom` and `coverViewport` properties on `MapComponent` can change the corresponding values after construction. Use `setView()` to apply a center and zoom together. Because `minZoom` must not exceed `maxZoom`, replacing both limits individually can temporarily produce an invalid range even when the final range is valid. `setZoomRange()` validates and applies the new pair together.
+The `center`, `zoom`, `minZoom`, `maxZoom`, `coverViewport` and `attributionPrefix` properties on `MapComponent` can change the corresponding values after construction. Use `setView()` to apply a center and zoom together. Because `minZoom` must not exceed `maxZoom`, replacing both limits individually can temporarily produce an invalid range even when the final range is valid. `setZoomRange()` validates and applies the new pair together.

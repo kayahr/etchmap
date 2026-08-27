@@ -1,4 +1,4 @@
-# @kayahr/map demo
+# EtchMap demos
 
 For simplicity the demos in this directory do not use a web bundler. Instead they load the scripts as standard ESM using an importmap. Because browsers don't like loading local files by default for security reasons you must access them via a local web server or start your browser with enabled file access.
 

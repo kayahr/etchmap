@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-import { type MapComponent, MapElement, type Point, WebMercatorProjection } from "@kayahr/map";
+import { type MapComponent, MapElement, type Point, WebMercatorProjection } from "@kayahr/etchmap";
 
 /** Airport data stored in the route-data file. */
 interface AirportData {

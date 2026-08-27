@@ -4,7 +4,7 @@ title: Tile sources and projections
 
 # Tile sources and projections
 
-`@kayahr/map` renders XYZ raster-tile sources. A tile source defines where images are loaded from, the shape of the tile grid, the available zoom levels, horizontal wrapping, the source coordinate system and the attribution required by its provider.
+EtchMap renders XYZ raster-tile sources. A tile source defines where images are loaded from, the shape of the tile grid, the available zoom levels, horizontal wrapping, the source coordinate system and the attribution required by its provider.
 
 ## Default OpenStreetMap source
 
@@ -12,14 +12,14 @@ Omitting source configuration selects the standard OpenStreetMap tile source. It
 
 ```html
 <script type="module">
-  import "@kayahr/map";
+  import "@kayahr/etchmap";
 </script>
 
 <kayahr-map center-x="6.9603" center-y="50.9375" zoom="13"></kayahr-map>
 ```
 
 ```ts
-import { MapComponent } from "@kayahr/map";
+import { MapComponent } from "@kayahr/etchmap";
 
 const map = new MapComponent({
     center: { x: 6.9603, y: 50.9375 },
@@ -40,7 +40,7 @@ Attribution strings are inserted as trusted HTML without sanitization. Define th
 Pass a `TileSource` in the `MapComponent` options. Programmatic tile URLs may be templates or functions.
 
 ```ts
-import { MapComponent, WebMercatorProjection, type TileSource } from "@kayahr/map";
+import { MapComponent, WebMercatorProjection, type TileSource } from "@kayahr/etchmap";
 
 const source: TileSource = {
     attribution: '© <a href="https://example.com/copyright">Example Maps</a>',
@@ -153,7 +153,7 @@ Select it with `"projection": "web-mercator"` in a declarative source or program
 `LinearProjection` maps arbitrary rectangular source coordinates directly to the tile world. It is suitable for game maps, floor plans, diagrams and other flat images. The four edges define the source coordinates corresponding to the complete tile world. Reversing `top` and `bottom` supports a Y axis which points upward.
 
 ```ts
-import { LinearProjection, MapComponent } from "@kayahr/map";
+import { LinearProjection, MapComponent } from "@kayahr/etchmap";
 
 const map = new MapComponent({
     center: { x: 0, y: 0 },
@@ -201,7 +201,7 @@ The short form `"projection": "linear"` uses the unit square from `{ x: 0, y: 0 
 Custom projections are configured programmatically by implementing the `Projection` interface. `project()` converts a source point to normalized tile-world coordinates and `unproject()` performs the reverse conversion. Both functions may return coordinates outside the finite zero-to-one tile area.
 
 ```ts
-import { MapComponent, type Point, type Projection } from "@kayahr/map";
+import { MapComponent, type Point, type Projection } from "@kayahr/etchmap";
 
 const projection: Projection = {
     project(point: Point): Point {

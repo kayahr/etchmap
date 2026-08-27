@@ -19,6 +19,9 @@ import { assertNotNull } from "./util/assert.ts";
 
 /** Atomically parsed declarative map configuration. */
 interface AttributeConfiguration {
+    /** Parsed attribution prefix when the corresponding attribute is present. */
+    readonly attributionPrefix?: string | false;
+
     /** Parsed positive cache capacity when the corresponding attribute is present. */
     readonly cacheSize?: number;
 
@@ -27,6 +30,9 @@ interface AttributeConfiguration {
 
     /** Parsed viewport-cover setting when the corresponding attribute is present. */
     readonly coverViewport?: boolean;
+
+    /** Whether `attribution-prefix` is present. */
+    readonly hasAttributionPrefix: boolean;
 
     /** Whether `cache-size` is present. */
     readonly hasCacheSize: boolean;
@@ -70,6 +76,7 @@ interface AttributeConfiguration {
  *
  * Map attributes:
  *
+ * - `attribution-prefix`: Trusted HTML displayed before the source attribution. Set it to `false` to omit the prefix.
  * - `center-x` and `center-y`: Source X and Y coordinates. They must be used together and default to the projected tile-world center.
  * - `zoom`: Initial continuous view zoom. Defaults to one level above the effective minimum.
  * - `min-zoom` and `max-zoom`: Continuous view limits. They default to the native tile-source limits but may extend beyond them.
@@ -86,6 +93,9 @@ interface AttributeConfiguration {
  * ```
  */
 export class MapElement extends HTMLElement {
+    /** Whether the attribution prefix has previously been controlled by an attribute. */
+    #attributionPrefixControlled = false;
+
     /** Whether declarative attributes must be applied on the next connection or microtask. */
     #attributesDirty = true;
 
@@ -126,7 +136,7 @@ export class MapElement extends HTMLElement {
      * @internal
      */
     protected static get observedAttributes(): string[] {
-        return [ "cache-size", "center-x", "center-y", "cover-viewport", "max-zoom", "min-zoom", "source", "zoom" ];
+        return [ "attribution-prefix", "cache-size", "center-x", "center-y", "cover-viewport", "max-zoom", "min-zoom", "source", "zoom" ];
     }
 
     /**
@@ -222,6 +232,10 @@ export class MapElement extends HTMLElement {
     #applyAttributes(): void {
         const configuration = this.#readAttributes();
 
+        if (configuration.hasAttributionPrefix || this.#attributionPrefixControlled) {
+            this.#component.attributionPrefix = configuration.attributionPrefix ?? null;
+        }
+
         if (configuration.hasSource) {
             this.#component.source = configuration.source;
         } else if (this.#sourceControlled) {
@@ -266,6 +280,7 @@ export class MapElement extends HTMLElement {
             this.#component.zoom = configuration.zoom ?? null;
         }
 
+        this.#attributionPrefixControlled = configuration.hasAttributionPrefix;
         this.#sourceControlled = configuration.hasSource;
         this.#cacheSizeControlled = configuration.hasCacheSize;
         this.#centerControlled = configuration.hasCenter;
@@ -285,6 +300,8 @@ export class MapElement extends HTMLElement {
      * @throws {@link !TypeError} When an attribute cannot be parsed.
      */
     #readAttributes(): AttributeConfiguration {
+        const attributionPrefixAttribute = this.getAttribute("attribution-prefix");
+        const cacheSizeAttribute = this.getAttribute("cache-size");
         const centerXAttribute = this.getAttribute("center-x");
         const centerYAttribute = this.getAttribute("center-y");
         const coverViewportAttribute = this.getAttribute("cover-viewport");
@@ -292,7 +309,6 @@ export class MapElement extends HTMLElement {
         const minZoomAttribute = this.getAttribute("min-zoom");
         const sourceAttribute = this.getAttribute("source");
         const zoomAttribute = this.getAttribute("zoom");
-        const cacheSizeAttribute = this.getAttribute("cache-size");
         if ((centerXAttribute == null) !== (centerYAttribute == null)) {
             throw new TypeError("center-x and center-y must be used together");
         }
@@ -300,10 +316,16 @@ export class MapElement extends HTMLElement {
             x: parseNumber(centerXAttribute, "center-x"),
             y: parseNumber(centerYAttribute, "center-y")
         };
+        let attributionPrefix: string | false | undefined;
+        if (attributionPrefixAttribute != null) {
+            attributionPrefix = attributionPrefixAttribute === "false" ? false : attributionPrefixAttribute;
+        }
         return {
+            attributionPrefix,
             cacheSize: cacheSizeAttribute == null ? undefined : parseInteger(cacheSizeAttribute, "cache-size", 1),
             center,
             coverViewport: coverViewportAttribute == null ? undefined : parseBoolean(coverViewportAttribute, "cover-viewport"),
+            hasAttributionPrefix: attributionPrefixAttribute != null,
             hasCacheSize: cacheSizeAttribute != null,
             hasCenter: center != null,
             hasCoverViewport: coverViewportAttribute != null,
