@@ -12,8 +12,7 @@ import { type TileSource, normalizeTileSource, osmTileSource, resolveTileURL } f
 describe("osmTileSource", () => {
     it("defines the complete frozen OpenStreetMap source", () => {
         assertEquals(osmTileSource, {
-            attribution: "© OpenStreetMap contributors",
-            attributionURL: "https://www.openstreetmap.org/copyright",
+            attribution: "© <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener noreferrer\">OpenStreetMap</a> contributors",
             crossOrigin: "anonymous",
             coverage: { bottom: 1, left: 0, right: 1, top: 0 },
             maxZoom: 19,
@@ -40,21 +39,18 @@ describe("normalizeTileSource", () => {
         const customSource = normalizeTileSource({ tileURL: osmTileSource.tileURL });
 
         assertSame(customSource.attribution, "");
-        assertSame(customSource.attributionURL, "");
         assertSame(customSource.wrapX, false);
     });
 
     it("normalizes custom defaults while preserving an explicit null CORS mode", () => {
         const source = normalizeTileSource({
-            attribution: "Example Maps",
-            attributionURL: "https://example.com/copyright",
+            attribution: "© <a href=\"https://example.com/copyright\">Example Maps</a>",
             crossOrigin: null,
             tileURL: "https://example.com/{z}/{x}/{y}.png"
         });
 
         assertEquals(source, {
-            attribution: "Example Maps",
-            attributionURL: "https://example.com/copyright",
+            attribution: "© <a href=\"https://example.com/copyright\">Example Maps</a>",
             crossOrigin: null,
             coverage: { bottom: 1, left: 0, right: 1, top: 0 },
             maxZoom: 19,

@@ -108,10 +108,10 @@ const styles =
         "cursor:grab;" +
         "touch-action:none;" +
         "user-select:none;" +
-        "writing-mode:horizontal-tb" +
-    "}" +
-    "canvas:active{" +
-        "cursor:grabbing" +
+        "writing-mode:horizontal-tb;" +
+        "&:active{" +
+            "cursor:grabbing" +
+        "}" +
     "}" +
     ".layers{" +
         "z-index:1;" +
@@ -124,11 +124,18 @@ const styles =
         "padding:0.125rem 0.25rem;" +
         "color:#222;" +
         "background:rgb(255 255 255 / 80%);" +
-        "font:11px/1.2 sans-serif;" +
-        "pointer-events:auto" +
-    "}" +
-    ".attribution:empty{" +
-        "display:none" +
+        "font:12px/1.2 sans-serif;" +
+        "pointer-events:auto;" +
+        "& a{" +
+            "color:#06c;" +
+            "text-decoration:none;" +
+            "&:hover{" +
+                "text-decoration:underline" +
+            "}" +
+        "}" +
+        "&:empty{" +
+            "display:none" +
+        "}" +
     "}" +
     "::slotted(*){" +
         "position:absolute;" +
@@ -244,8 +251,8 @@ export class MapComponent {
     /** Window in which the current animation frame was scheduled. */
     #animationFrameView: Window | null = null;
 
-    /** Link displaying the current tile-source attribution. */
-    readonly #attribution: HTMLAnchorElement;
+    /** Element displaying the current tile-source attribution. */
+    readonly #attribution: HTMLDivElement;
 
     /** Maximum number of ready tile images retained in memory. */
     #cacheSize: number;
@@ -352,11 +359,10 @@ export class MapComponent {
         this.#layers.className = "layers";
         this.#layers.append(ownerDocument.createElement("slot"));
 
-        this.#attribution = ownerDocument.createElement("a");
+        this.#attribution = ownerDocument.createElement("div");
         this.#attribution.className = "attribution";
         this.#attribution.setAttribute("part", "attribution");
-        this.#attribution.rel = "noopener noreferrer";
-        this.#attribution.target = "_blank";
+        this.#attribution.addEventListener("pointerdown", event => event.stopPropagation());
         this.#layers.append(this.#attribution);
 
         const style = ownerDocument.createElement("style");
@@ -1003,12 +1009,7 @@ export class MapComponent {
 
     /** Updates the visible attribution from the current tile source. */
     #updateAttribution(): void {
-        this.#attribution.textContent = this.#source.attribution;
-        if (this.#source.attribution.length > 0 && this.#source.attributionURL.length > 0) {
-            this.#attribution.href = this.#source.attributionURL;
-        } else {
-            this.#attribution.removeAttribute("href");
-        }
+        this.#attribution.innerHTML = this.#source.attribution;
     }
 
     /** Positions the attribution at the bottom-right corner of the visible tile coverage. */

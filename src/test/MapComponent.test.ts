@@ -295,7 +295,7 @@ describe("MapComponent", () => {
             });
 
             const attribution = element.shadowRoot?.querySelector(".attribution");
-            assertInstanceOf(attribution, HTMLAnchorElement);
+            assertInstanceOf(attribution, HTMLDivElement);
             assertSame(attribution.style.right, "150px");
             assertSame(attribution.style.bottom, "150px");
             element.remove();

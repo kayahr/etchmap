@@ -50,11 +50,8 @@ export interface TileCoverage {
 
 /** Configuration of an XYZ raster-tile source. */
 export interface TileSource {
-    /** Text displayed as source attribution. Empty or omitted text hides the attribution. */
+    /** Trusted HTML displayed as source attribution. Empty or omitted HTML hides the attribution. */
     readonly attribution?: string;
-
-    /** Optional link opened when the attribution is activated. */
-    readonly attributionURL?: string;
 
     /** Cross-origin mode used when loading tile images. Defaults to `anonymous`. */
     readonly crossOrigin?: TileCrossOrigin;
@@ -95,11 +92,8 @@ export interface TileSource {
 
 /** Fully normalized immutable tile-source configuration. */
 export interface NormalizedTileSource {
-    /** Text displayed as source attribution, or an empty string when hidden. */
+    /** Trusted HTML displayed as source attribution, or an empty string when hidden. */
     readonly attribution: string;
-
-    /** Attribution link URL, or an empty string when no link is configured. */
-    readonly attributionURL: string;
 
     /** Cross-origin mode used when loading tile images. */
     readonly crossOrigin: TileCrossOrigin;
@@ -137,8 +131,7 @@ export interface NormalizedTileSource {
 
 /** Fully normalized default OpenStreetMap raster-tile source. */
 const normalizedOSMTileSource: Readonly<NormalizedTileSource> = Object.freeze({
-    attribution: "© OpenStreetMap contributors",
-    attributionURL: "https://www.openstreetmap.org/copyright",
+    attribution: "© <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" rel=\"noopener noreferrer\">OpenStreetMap</a> contributors",
     crossOrigin: "anonymous",
     coverage: Object.freeze({ bottom: 1, left: 0, right: 1, top: 0 }),
     maxZoom: 19,
@@ -216,7 +209,6 @@ export function normalizeTileSource(source?: TileSource): Readonly<NormalizedTil
 
     return Object.freeze({
         attribution: source.attribution ?? "",
-        attributionURL: source.attributionURL ?? "",
         crossOrigin,
         coverage: Object.freeze({ ...coverage }),
         maxZoom,

@@ -7,7 +7,7 @@ import "./dom.ts";
 import { describe, it } from "node:test";
 import { assertCloseTo, assertEquals, assertInstanceOf, assertSame, assertThrowWithMessage } from "@kayahr/assert";
 
-const { MapComponent, MapElement } = await import("../main/index.ts");
+const { MapComponent, MapElement, osmTileSource } = await import("../main/index.ts");
 
 describe("MapElement", () => {
     describe("getComponent", () => {
@@ -24,7 +24,7 @@ describe("MapElement", () => {
             assertInstanceOf(shadow.children[0], HTMLCanvasElement);
             assertSame(shadow.children[1]?.className, "layers");
             assertInstanceOf(shadow.children[1]?.firstElementChild, HTMLSlotElement);
-            assertInstanceOf(shadow.children[1]?.children[1], HTMLAnchorElement);
+            assertInstanceOf(shadow.children[1]?.children[1], HTMLDivElement);
             assertInstanceOf(shadow.children[2], HTMLStyleElement);
         });
 
@@ -80,9 +80,8 @@ describe("MapElement", () => {
             assertCloseTo(component.source.projection?.project({ x: -180, y: 90 }), { x: 0, y: 0 }, 8);
             assertCloseTo(component.source.projection?.project({ x: 180, y: -90 }), { x: 1, y: 1 }, 8);
             const attribution = element.shadowRoot?.querySelector(".attribution");
-            assertInstanceOf(attribution, HTMLAnchorElement);
-            assertSame(attribution.textContent, "");
-            assertSame(attribution.hasAttribute("href"), false);
+            assertInstanceOf(attribution, HTMLDivElement);
+            assertSame(attribution.innerHTML, "");
             element.remove();
         });
 
@@ -137,7 +136,7 @@ describe("MapElement", () => {
             element.removeAttribute("source");
             await Promise.resolve();
 
-            assertSame(component.source.attribution, "© OpenStreetMap contributors");
+            assertSame(component.source.attribution, osmTileSource.attribution);
             assertSame(component.source.tileURL, "https://tile.openstreetmap.org/{z}/{x}/{y}.png");
             element.remove();
         });
@@ -270,8 +269,7 @@ describe("MapElement", () => {
             const component = new MapComponent({
                 center: { x: 34, y: 12 },
                 source: {
-                    attribution: "Custom tiles",
-                    attributionURL: "https://example.com/copyright",
+                    attribution: "Custom tiles by <a href=\"https://example.com/copyright\">Example Maps</a>",
                     tileURL: "https://example.com/{z}/{x}/{y}.png"
                 },
                 zoom: 7
@@ -283,9 +281,11 @@ describe("MapElement", () => {
             assertSame(component.zoom, 7);
             assertSame(component.source.tileURL, "https://example.com/{z}/{x}/{y}.png");
             const attribution = element.shadowRoot?.querySelector(".attribution");
-            assertInstanceOf(attribution, HTMLAnchorElement);
-            assertSame(attribution.textContent, "Custom tiles");
-            assertSame(attribution.href, "https://example.com/copyright");
+            assertInstanceOf(attribution, HTMLDivElement);
+            assertSame(attribution.textContent, "Custom tiles by Example Maps");
+            const link = attribution.querySelector("a");
+            assertInstanceOf(link, HTMLAnchorElement);
+            assertSame(link.href, "https://example.com/copyright");
             element.remove();
         });
     });

@@ -336,7 +336,6 @@ function parseSource(value: string): TileSource {
     const source = parseJSONObject(parsed, "source");
     return {
         attribution: parseOptionalJSONString(source.attribution, "source.attribution"),
-        attributionURL: parseOptionalJSONString(source.attributionURL, "source.attributionURL"),
         coverage: parseJSONCoverage(source.coverage),
         crossOrigin: parseJSONCrossOrigin(source.crossOrigin),
         maxZoom: parseOptionalJSONNumber(source.maxZoom, "source.maxZoom"),

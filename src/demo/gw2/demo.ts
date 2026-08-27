@@ -6,8 +6,7 @@
 import { LinearProjection, MapComponent, type TileSource } from "@kayahr/map";
 
 const source: TileSource = {
-    attribution: "© ArenaNet, LLC.",
-    attributionURL: "https://www.arena.net/en/legal/content-terms-of-use",
+    attribution: "© <a href=\"https://www.arena.net/en/legal/content-terms-of-use\" target=\"_blank\" rel=\"noopener noreferrer\">ArenaNet, LLC.</a>",
     coverage: {
         bottom: 111_000 / 114_688,
         left: 0,

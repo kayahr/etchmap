@@ -8,7 +8,7 @@ title: Tile sources and projections
 
 ## Default OpenStreetMap source
 
-Omitting source configuration selects the standard OpenStreetMap tile source. It uses 256 × 256 pixel tiles, one root tile at zoom 0, zoom levels 0 through 19, horizontal wrapping and Web Mercator coordinates. The required `© OpenStreetMap contributors` attribution and copyright link are displayed automatically.
+Omitting source configuration selects the standard OpenStreetMap tile source. It uses 256 × 256 pixel tiles, one root tile at zoom 0, zoom levels 0 through 19, horizontal wrapping and Web Mercator coordinates. The required `© OpenStreetMap contributors` attribution is displayed automatically, with `OpenStreetMap` linked to its copyright page.
 
 ```html
 <script type="module">
@@ -31,7 +31,9 @@ document.body.append(map.getElement());
 
 ## Custom sources
 
-A custom source starts with a tile URL. String templates support `{z}` for the integer zoom level, `{x}` for the tile column and `{y}` for the tile row. Configure the visible attribution and link according to the requirements of the tile provider.
+A custom source starts with a tile URL. String templates support `{z}` for the integer zoom level, `{x}` for the tile column and `{y}` for the tile row. Configure the attribution HTML according to the requirements of the tile provider.
+
+Attribution strings are inserted as trusted HTML without sanitization. Define them only in application-controlled source configuration, never from untrusted input.
 
 ### Programmatic configuration
 
@@ -41,8 +43,7 @@ Pass a `TileSource` in the `MapComponent` options. Programmatic tile URLs may be
 import { MapComponent, WebMercatorProjection, type TileSource } from "@kayahr/map";
 
 const source: TileSource = {
-    attribution: "Example Maps",
-    attributionURL: "https://example.com/copyright",
+    attribution: '© <a href="https://example.com/copyright">Example Maps</a>',
     crossOrigin: "anonymous",
     maxZoom: 19,
     minZoom: 0,
@@ -74,8 +75,7 @@ Set the `source` attribute on `<kayahr-map>` to a JSON object. Single quotes del
   center-y="50.9375"
   zoom="13"
   source='{
-    "attribution": "Example Maps",
-    "attributionURL": "https://example.com/copyright",
+    "attribution": "© <a href=https://example.com/copyright>Example Maps</a>",
     "coverage": {
       "bottom": 1,
       "left": 0,
@@ -106,7 +106,7 @@ The recognized JSON properties mirror `TileSource`. Additional application-speci
 - `coverage`: Rectangular valid area within the tile world. All four edges are normalized values from zero through one, with `(0, 0)` at the top-left and `(1, 1)` at the bottom-right. `left` must be smaller than `right`, and `top` must be smaller than `bottom`. It defaults to `{ left: 0, top: 0, right: 1, bottom: 1 }`. Tiles completely outside this area are not requested, intersecting edge tiles are clipped to it, and camera constraints use it as the available map area. It does not change the tile grid or URL coordinates and cannot describe holes within the rectangle.
 - `wrapX`: Whether the grid repeats horizontally. It defaults to `false`.
 - `crossOrigin`: `anonymous`, `use-credentials` or `null`. It defaults to `anonymous`.
-- `attribution` and `attributionURL`: Provider credit displayed over the map and its optional link.
+- `attribution`: Trusted provider-credit HTML displayed over the map. It defaults to an empty string, which hides the attribution.
 
 ## Tile-grid geometry
 
@@ -158,8 +158,7 @@ import { LinearProjection, MapComponent } from "@kayahr/map";
 const map = new MapComponent({
     center: { x: 0, y: 0 },
     source: {
-        attribution: "Example Game Maps",
-        attributionURL: "https://example.com/copyright",
+        attribution: '© <a href="https://example.com/copyright">Example Game Maps</a>',
         projection: new LinearProjection({
             bottom: -324698,
             left: -324698,
@@ -180,8 +179,7 @@ Declarative example:
   center-x="0"
   center-y="0"
   source='{
-    "attribution": "Example Game Maps",
-    "attributionURL": "https://example.com/copyright",
+    "attribution": "© <a href=https://example.com/copyright>Example Game Maps</a>",
     "projection": {
       "type": "linear",
       "edges": {
@@ -222,8 +220,7 @@ const projection: Projection = {
 
 const map = new MapComponent({
     source: {
-        attribution: "Example Maps",
-        attributionURL: "https://example.com/copyright",
+        attribution: '© <a href="https://example.com/copyright">Example Maps</a>',
         projection,
         tileURL: "https://example.com/tiles/{z}/{x}/{y}.png"
     }
