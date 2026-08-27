@@ -54,9 +54,9 @@ document.body.append(map.getElement());
 
 ## Demos
 
-- [Simple demo] uses the default OpenStreetMap source and the `onDraw` callback to position an HTML marker at Cologne Cathedral.
-- [GW2 demo] renders the Tyria world map from the [Guild Wars 2 map API] as a linear tile source with viewport covering disabled.
-- [Flights demo] is a more complex animated example with moving aircraft, dynamically changing routes and naturally projected great-circle polylines.
+- [Simple demo] ([Source](https://github.com/kayahr/etchmap/tree/main/src/demo/simple)) - Uses the default OpenStreetMap source and the `onDraw` callback to position an HTML marker at Cologne Cathedral.
+- [GW2 demo] ([Source](https://github.com/kayahr/etchmap/tree/main/src/demo/gw2)) - Renders the Tyria world map from the [Guild Wars 2 map API] as a linear tile source with viewport covering disabled.
+- [Flights demo] ([Source](https://github.com/kayahr/etchmap/tree/main/src/demo/flights)) - A more complex animated example with moving aircraft, dynamically changing routes and naturally projected great-circle polylines.
 
 ## See also
 
