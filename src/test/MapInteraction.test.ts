@@ -134,6 +134,7 @@ function createFixture(handleMapEvent?: (event: MapPointerEvent | MapWheelEvent)
         changes,
         events,
         interaction: new MapInteraction(
+            canvas as unknown as HTMLElement,
             canvas as unknown as HTMLCanvasElement,
             camera,
             () => ({ x: 400, y: 300 }),

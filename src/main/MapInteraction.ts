@@ -114,8 +114,11 @@ export class MapInteraction {
     /** Camera manipulated by this controller. */
     readonly #camera: MapCamera;
 
-    /** Canvas receiving pointer and wheel events. */
+    /** Canvas defining the logical viewport rectangle. */
     readonly #canvas: HTMLCanvasElement;
+
+    /** Map element receiving bubbling interaction events from its Canvas and overlays. */
+    readonly #element: HTMLElement;
 
     /** Pointer IDs claimed by consumers instead of participating in built-in map gestures. */
     readonly #claimedPointers = new Set<number>();
@@ -150,16 +153,18 @@ export class MapInteraction {
     /**
      * Creates an interaction controller.
      *
-     * @param canvas     - Canvas receiving interaction events.
+     * @param element    - Map element receiving bubbling interaction events from its Canvas and overlays.
+     * @param canvas     - Canvas defining the logical viewport rectangle.
      * @param camera     - Camera to manipulate.
      * @param size       - Function returning the current viewport size.
      * @param onChange   - Callback requesting a frame after a camera change.
      * @param onMapEvent - Callback dispatching an enriched map input event and returning whether its default action may run.
      */
-    public constructor(canvas: HTMLCanvasElement, camera: MapCamera, size: () => Point, onChange: () => void,
+    public constructor(element: HTMLElement, canvas: HTMLCanvasElement, camera: MapCamera, size: () => Point, onChange: () => void,
             onMapEvent: (event: MapPointerEvent | MapWheelEvent) => boolean) {
         this.#camera = camera;
         this.#canvas = canvas;
+        this.#element = element;
         this.#onChange = onChange;
         this.#onMapEvent = onMapEvent;
         this.#size = size;
@@ -250,28 +255,28 @@ export class MapInteraction {
             return;
         }
         this.#listening = true;
-        this.#canvas.addEventListener("pointerdown", this.#onPointerDown);
-        this.#canvas.addEventListener("pointermove", this.#onPointerMove);
-        this.#canvas.addEventListener("pointerup", this.#onPointerUp);
-        this.#canvas.addEventListener("pointercancel", this.#onPointerCancel);
-        this.#canvas.addEventListener("lostpointercapture", this.#onLostPointerCapture);
-        this.#canvas.addEventListener("wheel", this.#onWheel, { passive: false });
+        this.#element.addEventListener("pointerdown", this.#onPointerDown);
+        this.#element.addEventListener("pointermove", this.#onPointerMove);
+        this.#element.addEventListener("pointerup", this.#onPointerUp);
+        this.#element.addEventListener("pointercancel", this.#onPointerCancel);
+        this.#element.addEventListener("lostpointercapture", this.#onLostPointerCapture);
+        this.#element.addEventListener("wheel", this.#onWheel, { passive: false });
     }
 
     /** Removes event listeners and cancels all interaction state. */
     public disconnect(): void {
         if (this.#listening) {
             this.#listening = false;
-            this.#canvas.removeEventListener("pointerdown", this.#onPointerDown);
-            this.#canvas.removeEventListener("pointermove", this.#onPointerMove);
-            this.#canvas.removeEventListener("pointerup", this.#onPointerUp);
-            this.#canvas.removeEventListener("pointercancel", this.#onPointerCancel);
-            this.#canvas.removeEventListener("lostpointercapture", this.#onLostPointerCapture);
-            this.#canvas.removeEventListener("wheel", this.#onWheel);
+            this.#element.removeEventListener("pointerdown", this.#onPointerDown);
+            this.#element.removeEventListener("pointermove", this.#onPointerMove);
+            this.#element.removeEventListener("pointerup", this.#onPointerUp);
+            this.#element.removeEventListener("pointercancel", this.#onPointerCancel);
+            this.#element.removeEventListener("lostpointercapture", this.#onLostPointerCapture);
+            this.#element.removeEventListener("wheel", this.#onWheel);
         }
         for (const pointerId of new Set([ ...this.#pointers.keys(), ...this.#claimedPointers ])) {
-            if (this.#canvas.hasPointerCapture(pointerId)) {
-                this.#canvas.releasePointerCapture(pointerId);
+            if (this.#element.hasPointerCapture(pointerId)) {
+                this.#element.releasePointerCapture(pointerId);
             }
         }
         this.#claimedPointers.clear();
@@ -307,7 +312,7 @@ export class MapInteraction {
         if (startView.centerX === constrainedTarget.centerX && startView.centerY === constrainedTarget.centerY && startView.zoom === constrainedTarget.zoom) {
             this.#camera.setWorldView(targetView.centerX, targetView.centerY, targetView.zoom);
         } else {
-            const view = this.#canvas.ownerDocument?.defaultView;
+            const view = this.#element.ownerDocument?.defaultView;
             this.#viewTransition = {
                 startView,
                 startedAt: view?.performance.now() ?? performance.now(),
@@ -351,7 +356,7 @@ export class MapInteraction {
         const point = this.#toPoint(event);
         if (!this.#dispatchPointerEvent("map-pointerdown", event, point)) {
             this.#claimedPointers.add(event.pointerId);
-            this.#canvas.setPointerCapture(event.pointerId);
+            this.#element.setPointerCapture(event.pointerId);
             return;
         }
         if (event.pointerType !== "touch" && event.button !== 0) {
@@ -359,7 +364,7 @@ export class MapInteraction {
         }
         this.stop();
         this.#pointers.set(event.pointerId, { point, timestamp: event.timeStamp });
-        this.#canvas.setPointerCapture(event.pointerId);
+        this.#element.setPointerCapture(event.pointerId);
         this.#restartGesture();
     };
 

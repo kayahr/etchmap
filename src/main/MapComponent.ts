@@ -365,6 +365,7 @@ export class MapComponent {
 
         this.#tileRenderer = this.#createTileRenderer();
         this.#interaction = new MapInteraction(
+            this.#element,
             this.#canvas,
             this.#camera,
             () => ({ x: this.#cssWidth, y: this.#cssHeight }),
