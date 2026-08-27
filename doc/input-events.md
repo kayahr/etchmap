@@ -4,7 +4,7 @@ title: Map input events
 
 # Map input events
 
-`<kayahr-map>` dispatches enriched events for mouse, pen, touch and wheel input on the map Canvas. They provide the usual browser-event information together with the map location beneath the input. Use them to inspect or select locations, implement drawing tools or replace a built-in map interaction with application-specific behavior.
+`<kayahr-map>` dispatches enriched events for mouse, pen, touch and wheel input on the map. They provide the usual browser-event information together with the map location beneath the input. Use them to inspect or select locations, implement drawing tools or replace a built-in map interaction with application-specific behavior.
 
 | Event | Dispatched when |
 | --- | --- |
@@ -12,11 +12,11 @@ title: Map input events
 | `map-pointermove` | A pointer moves over the Canvas or continues moving while captured by it. |
 | `map-pointerup` | An active pointer is released. |
 | `map-pointercancel` | The browser cancels an active pointer. |
-| `map-wheel` | A wheel event occurs over the map Canvas. |
+| `map-wheel` | A wheel event occurs over the map or an HTML overlay which has not claimed wheel input. |
 
 The four `map-pointer*` events implement `MapPointerEvent`, which extends `PointerEvent`. `map-wheel` implements `MapWheelEvent`, which extends `WheelEvent`. All map input events bubble from the `<kayahr-map>` element and are composed, so they can also be handled by its ancestors.
 
-Slotted HTML overlays receive their ordinary native pointer events. Map pointer events are generated for input handled by the map Canvas itself.
+Slotted HTML overlays are pointer-transparent by default. Set `pointer-events: auto` on an overlay or selected descendants when they need to receive native pointer input. Map pointer events are generated only for input handled by the map Canvas itself.
 
 ## Listening for events
 
@@ -55,11 +55,13 @@ document.body.append(element);
 | `sourcePoint` | Coordinates interpreted by the current source projection, such as longitude and latitude in degrees for Web Mercator. This is equivalent to calling `map.unproject(event.viewportPoint)`. |
 | `worldPoint` | Pixels in the tile world at the source's minimum zoom level. Unlike `sourcePoint`, its horizontal coordinate preserves which repeated world copy was targeted when the source wraps. |
 | `clientX`, `clientY` | Inherited browser-viewport coordinates from the native pointer event. |
-| `originalEvent` | The unmodified native `PointerEvent` from which the map event was created. |
+| `originalEvent` | The unmodified native `PointerEvent` or `WheelEvent` from which the map event was created. |
 
 ## Wheel input
 
 `map-wheel` exposes the inherited `deltaX`, `deltaY`, `deltaZ` and `deltaMode` properties together with the map coordinates beneath the wheel cursor. Calling `preventDefault()` on the map event suppresses the built-in wheel-zoom animation. It does not cancel the native browser action; call `event.originalEvent.preventDefault()` as well when an application-specific wheel interaction must also prevent page scrolling.
+
+Wheel input normally zooms the map even over an interactive HTML overlay. Add the boolean `data-etchmap-wheel` attribute to an overlay or one of its ancestors when that subtree uses wheel input itself. EtchMap then neither dispatches `map-wheel` nor prevents the native wheel event, so a textarea or scrollable panel retains its normal behavior.
 
 ## Claiming a pointer
 

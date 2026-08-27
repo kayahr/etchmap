@@ -96,8 +96,7 @@ const styles =
     ":host{" +
         "display:block;" +
         "position:relative;" +
-        "overflow:hidden;" +
-        "touch-action:none" +
+        "overflow:hidden" +
     "}" +
     "canvas,.layers{" +
         "position:absolute;" +
@@ -141,8 +140,7 @@ const styles =
         "}" +
     "}" +
     "::slotted(*){" +
-        "position:absolute;" +
-        "pointer-events:auto" +
+        "position:absolute" +
     "}";
 
 /** Options used when creating a map component. */
@@ -372,7 +370,6 @@ export class MapComponent {
         this.#attribution = ownerDocument.createElement("div");
         this.#attribution.className = "attribution";
         this.#attribution.setAttribute("part", "attribution");
-        this.#attribution.addEventListener("pointerdown", event => event.stopPropagation());
         this.#layers.append(this.#attribution);
 
         const style = ownerDocument.createElement("style");

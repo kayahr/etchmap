@@ -16,6 +16,9 @@ const wheelZoomTimeConstant = 140;
 /** Duration of a programmatic camera transition in milliseconds. */
 const viewTransitionDuration = 600;
 
+/** Attribute marking an HTML overlay subtree which handles native wheel input itself. */
+const wheelOwnerAttribute = "data-etchmap-wheel";
+
 /** One active pointer. */
 interface ActivePointer {
     /** Latest viewport-relative position in CSS pixels. */
@@ -117,7 +120,7 @@ export class MapInteraction {
     /** Canvas defining the logical viewport rectangle. */
     readonly #canvas: HTMLCanvasElement;
 
-    /** Map element receiving bubbling interaction events from its Canvas and overlays. */
+    /** Map element receiving wheel events bubbling from its Canvas and overlays. */
     readonly #element: HTMLElement;
 
     /** Pointer IDs claimed by consumers instead of participating in built-in map gestures. */
@@ -153,8 +156,8 @@ export class MapInteraction {
     /**
      * Creates an interaction controller.
      *
-     * @param element    - Map element receiving bubbling interaction events from its Canvas and overlays.
-     * @param canvas     - Canvas defining the logical viewport rectangle.
+     * @param element    - Map element receiving wheel events bubbling from its Canvas and overlays.
+     * @param canvas     - Canvas defining the logical viewport rectangle and receiving pointer input.
      * @param camera     - Camera to manipulate.
      * @param size       - Function returning the current viewport size.
      * @param onChange   - Callback requesting a frame after a camera change.
@@ -255,11 +258,11 @@ export class MapInteraction {
             return;
         }
         this.#listening = true;
-        this.#element.addEventListener("pointerdown", this.#onPointerDown);
-        this.#element.addEventListener("pointermove", this.#onPointerMove);
-        this.#element.addEventListener("pointerup", this.#onPointerUp);
-        this.#element.addEventListener("pointercancel", this.#onPointerCancel);
-        this.#element.addEventListener("lostpointercapture", this.#onLostPointerCapture);
+        this.#canvas.addEventListener("pointerdown", this.#onPointerDown);
+        this.#canvas.addEventListener("pointermove", this.#onPointerMove);
+        this.#canvas.addEventListener("pointerup", this.#onPointerUp);
+        this.#canvas.addEventListener("pointercancel", this.#onPointerCancel);
+        this.#canvas.addEventListener("lostpointercapture", this.#onLostPointerCapture);
         this.#element.addEventListener("wheel", this.#onWheel, { passive: false });
     }
 
@@ -267,16 +270,16 @@ export class MapInteraction {
     public disconnect(): void {
         if (this.#listening) {
             this.#listening = false;
-            this.#element.removeEventListener("pointerdown", this.#onPointerDown);
-            this.#element.removeEventListener("pointermove", this.#onPointerMove);
-            this.#element.removeEventListener("pointerup", this.#onPointerUp);
-            this.#element.removeEventListener("pointercancel", this.#onPointerCancel);
-            this.#element.removeEventListener("lostpointercapture", this.#onLostPointerCapture);
+            this.#canvas.removeEventListener("pointerdown", this.#onPointerDown);
+            this.#canvas.removeEventListener("pointermove", this.#onPointerMove);
+            this.#canvas.removeEventListener("pointerup", this.#onPointerUp);
+            this.#canvas.removeEventListener("pointercancel", this.#onPointerCancel);
+            this.#canvas.removeEventListener("lostpointercapture", this.#onLostPointerCapture);
             this.#element.removeEventListener("wheel", this.#onWheel);
         }
         for (const pointerId of new Set([ ...this.#pointers.keys(), ...this.#claimedPointers ])) {
-            if (this.#element.hasPointerCapture(pointerId)) {
-                this.#element.releasePointerCapture(pointerId);
+            if (this.#canvas.hasPointerCapture(pointerId)) {
+                this.#canvas.releasePointerCapture(pointerId);
             }
         }
         this.#claimedPointers.clear();
@@ -356,7 +359,7 @@ export class MapInteraction {
         const point = this.#toPoint(event);
         if (!this.#dispatchPointerEvent("map-pointerdown", event, point)) {
             this.#claimedPointers.add(event.pointerId);
-            this.#element.setPointerCapture(event.pointerId);
+            this.#canvas.setPointerCapture(event.pointerId);
             return;
         }
         if (event.pointerType !== "touch" && event.button !== 0) {
@@ -364,7 +367,7 @@ export class MapInteraction {
         }
         this.stop();
         this.#pointers.set(event.pointerId, { point, timestamp: event.timeStamp });
-        this.#element.setPointerCapture(event.pointerId);
+        this.#canvas.setPointerCapture(event.pointerId);
         this.#restartGesture();
     };
 
@@ -444,6 +447,9 @@ export class MapInteraction {
      * @param event - Wheel event whose position becomes the fixed zoom anchor.
      */
     readonly #onWheel = (event: WheelEvent): void => {
+        if (this.#isWheelOwnedByOverlay(event)) {
+            return;
+        }
         const anchorScreen = this.#toPoint(event);
         if (!this.#dispatchWheelEvent(event, anchorScreen)) {
             return;
@@ -465,6 +471,17 @@ export class MapInteraction {
         this.#onChange();
         event.preventDefault();
     };
+
+    /**
+     * Checks whether an HTML overlay in the event path explicitly owns wheel input.
+     *
+     * @param event - Native wheel event whose composed path is inspected.
+     * @returns `true` when an element in the path has the `data-etchmap-wheel` attribute.
+     */
+    #isWheelOwnedByOverlay(event: WheelEvent): boolean {
+        const ElementClass = this.#element.ownerDocument.defaultView?.Element;
+        return ElementClass != null && event.composedPath().some(target => target instanceof ElementClass && target.hasAttribute(wheelOwnerAttribute));
+    }
 
     /** Restarts the direct-manipulation gesture from the current camera and pointer set. */
     #restartGesture(): void {

@@ -31,6 +31,9 @@ class CanvasMock {
     /** Event-listener removals. */
     public readonly removedListeners: ListenerRegistration[] = [];
 
+    /** Document owning this event target. */
+    public readonly ownerDocument = document;
+
     /** Active event listeners by event type. */
     readonly #listeners = new Map<string, Set<EventListenerOrEventListenerObject>>();
 
@@ -104,6 +107,7 @@ interface Fixture {
     readonly camera: MapCamera;
     readonly canvas: CanvasMock;
     readonly changes: { count: number };
+    readonly element: CanvasMock;
     readonly events: MapPointerEvent[];
     readonly interaction: MapInteraction;
     readonly wheelEvents: MapWheelEvent[];
@@ -125,6 +129,7 @@ function createFixture(handleMapEvent?: (event: MapPointerEvent | MapWheelEvent)
     const camera = new MapCamera(source, { x: 0, y: 0 }, 3);
     const canvas = new CanvasMock();
     const changes = { count: 0 };
+    const element = new CanvasMock();
     const events: MapPointerEvent[] = [];
     const wheelEvents: MapWheelEvent[] = [];
     camera.resize(400, 300);
@@ -132,9 +137,10 @@ function createFixture(handleMapEvent?: (event: MapPointerEvent | MapWheelEvent)
         camera,
         canvas,
         changes,
+        element,
         events,
         interaction: new MapInteraction(
-            canvas as unknown as HTMLElement,
+            element as unknown as HTMLElement,
             canvas as unknown as HTMLCanvasElement,
             camera,
             () => ({ x: 400, y: 300 }),
@@ -185,7 +191,7 @@ function createWheelEvent(point: Point, deltaY: number, timestamp: number, delta
 describe("MapInteraction", () => {
     describe("connect", () => {
         it("installs only modern pointer and wheel listeners without canceling pointer down", () => {
-            const { canvas, interaction } = createFixture();
+            const { canvas, element, interaction } = createFixture();
 
             interaction.connect();
             interaction.connect();
@@ -195,10 +201,10 @@ describe("MapInteraction", () => {
                 "pointermove",
                 "pointerup",
                 "pointercancel",
-                "lostpointercapture",
-                "wheel"
+                "lostpointercapture"
             ]);
-            assertEquals(canvas.addedListeners.at(-1)?.options, { passive: false });
+            assertEquals(element.addedListeners.map(listener => listener.type), [ "wheel" ]);
+            assertEquals(element.addedListeners[0]?.options, { passive: false });
 
             const pointerDown = createPointerEvent("pointerdown", 7, { x: 100, y: 100 }, 10);
             canvas.dispatch(pointerDown);
@@ -209,7 +215,7 @@ describe("MapInteraction", () => {
 
     describe("disconnect", () => {
         it("removes listeners, releases pointers and stops interaction", () => {
-            const { camera, canvas, changes, interaction } = createFixture();
+            const { camera, canvas, changes, element, interaction } = createFixture();
             const initialCenter = camera.sourceCenter;
             interaction.connect();
             canvas.dispatch(createPointerEvent("pointerdown", 7, { x: 100, y: 100 }, 10));
@@ -222,9 +228,9 @@ describe("MapInteraction", () => {
                 "pointermove",
                 "pointerup",
                 "pointercancel",
-                "lostpointercapture",
-                "wheel"
+                "lostpointercapture"
             ]);
+            assertEquals(element.removedListeners.map(listener => listener.type), [ "wheel" ]);
             assertSame(canvas.hasPointerCapture(7), false);
             assertSame(interaction.animating, false);
 
@@ -413,14 +419,14 @@ describe("MapInteraction", () => {
 
     describe("wheel events", () => {
         it("dispatches an enriched map event before applying built-in zoom", () => {
-            const { camera, canvas, changes, interaction, wheelEvents } = createFixture();
+            const { camera, changes, element, interaction, wheelEvents } = createFixture();
             interaction.connect();
             const viewportPoint = { x: 100, y: 75 };
             const worldPoint = camera.toWorld(viewportPoint);
             const sourcePoint = camera.unproject(viewportPoint);
             const originalEvent = createWheelEvent(viewportPoint, -100, 100);
 
-            canvas.dispatch(originalEvent);
+            element.dispatch(originalEvent);
 
             const event = wheelEvents[0];
             if (event == null) {
@@ -439,7 +445,7 @@ describe("MapInteraction", () => {
         });
 
         it("does not zoom when the enriched event is canceled", () => {
-            const { canvas, changes, interaction, wheelEvents } = createFixture(event => {
+            const { changes, element, interaction, wheelEvents } = createFixture(event => {
                 if (event instanceof WheelEvent) {
                     event.preventDefault();
                 }
@@ -447,7 +453,7 @@ describe("MapInteraction", () => {
             interaction.connect();
             const originalEvent = createWheelEvent({ x: 100, y: 75 }, -100, 100);
 
-            canvas.dispatch(originalEvent);
+            element.dispatch(originalEvent);
 
             assertSame(wheelEvents.length, 1);
             assertSame(interaction.animating, false);
@@ -456,13 +462,13 @@ describe("MapInteraction", () => {
         });
 
         it("animates and retargets wheel zoom while preserving its screen anchor", () => {
-            const { camera, canvas, changes, interaction } = createFixture();
+            const { camera, changes, element, interaction } = createFixture();
             const anchor = { x: 100, y: 75 };
             interaction.connect();
             const anchorWorld = camera.toWorld(anchor);
 
             const firstWheel = createWheelEvent(anchor, -100, 100);
-            canvas.dispatch(firstWheel);
+            element.dispatch(firstWheel);
 
             assertSame(firstWheel.defaultPrevented, true);
             assertSame(interaction.animating, true);
@@ -474,7 +480,7 @@ describe("MapInteraction", () => {
             assertCloseTo(camera.toWorld(anchor), anchorWorld, 10);
 
             const secondWheel = createWheelEvent(anchor, -100, 140);
-            canvas.dispatch(secondWheel);
+            element.dispatch(secondWheel);
             assertSame(interaction.targetView?.zoom ?? null, 5);
             assertSame(changes.count, 2);
 
@@ -495,25 +501,25 @@ describe("MapInteraction", () => {
             assertSame(changes.count, 2);
 
             const zeroWheel = createWheelEvent(anchor, 0, timestamp + 20);
-            canvas.dispatch(zeroWheel);
+            element.dispatch(zeroWheel);
             assertSame(zeroWheel.defaultPrevented, false);
             assertSame(interaction.animating, false);
             assertSame(changes.count, 2);
         });
 
         it("normalizes pixel, line and page deltas", () => {
-            const { canvas, interaction } = createFixture();
+            const { element, interaction } = createFixture();
             interaction.connect();
 
-            canvas.dispatch(createWheelEvent({ x: 200, y: 150 }, -25, 100));
+            element.dispatch(createWheelEvent({ x: 200, y: 150 }, -25, 100));
             assertSame(interaction.targetView?.zoom ?? null, 3.25);
             interaction.stop();
 
-            canvas.dispatch(createWheelEvent({ x: 200, y: 150 }, -3, 200, WheelEvent.DOM_DELTA_LINE));
+            element.dispatch(createWheelEvent({ x: 200, y: 150 }, -3, 200, WheelEvent.DOM_DELTA_LINE));
             assertSame(interaction.targetView?.zoom ?? null, 4);
             interaction.stop();
 
-            canvas.dispatch(createWheelEvent({ x: 200, y: 150 }, 1, 300, WheelEvent.DOM_DELTA_PAGE));
+            element.dispatch(createWheelEvent({ x: 200, y: 150 }, 1, 300, WheelEvent.DOM_DELTA_PAGE));
             assertSame(interaction.targetView?.zoom ?? null, 2);
         });
     });
@@ -558,23 +564,23 @@ describe("MapInteraction", () => {
 
     describe("targetView", () => {
         it("snaps full wheel steps from a fractional camera zoom to integer levels", () => {
-            const { camera, canvas, interaction } = createFixture();
+            const { camera, element, interaction } = createFixture();
             interaction.connect();
             camera.setZoom(3.25);
 
-            canvas.dispatch(createWheelEvent({ x: 200, y: 150 }, -100, 100));
+            element.dispatch(createWheelEvent({ x: 200, y: 150 }, -100, 100));
             assertSame(interaction.targetView?.zoom ?? null, 4);
             interaction.stop();
 
-            canvas.dispatch(createWheelEvent({ x: 200, y: 150 }, 100, 200));
+            element.dispatch(createWheelEvent({ x: 200, y: 150 }, 100, 200));
             assertSame(interaction.targetView?.zoom ?? null, 3);
         });
 
         it("reconciles an active wheel destination with a raised viewport minimum", () => {
-            const { camera, canvas, interaction } = createFixture();
+            const { camera, element, interaction } = createFixture();
             interaction.connect();
 
-            canvas.dispatch(createWheelEvent({ x: 200, y: 150 }, 100, 100));
+            element.dispatch(createWheelEvent({ x: 200, y: 150 }, 100, 100));
             assertSame(interaction.targetView?.zoom ?? null, 2);
             camera.resize(16_384, 16_384);
             assertSame(camera.zoom, 4);

@@ -76,7 +76,7 @@ describe("MapComponent", () => {
             });
             const expectedSourcePoint = component.unproject({ x: 100, y: 75 });
 
-            element.dispatchEvent(originalEvent);
+            canvas.dispatchEvent(originalEvent);
 
             const received = events[0];
             if (received == null) {
@@ -88,7 +88,7 @@ describe("MapComponent", () => {
             element.remove();
         });
 
-        it("receives pointer events which bubble from non-interactive overlays", () => {
+        it("does not handle pointer events dispatched to HTML overlays", () => {
             const component = createComponent();
             const element = component.getElement();
             const marker = document.createElement("div");
@@ -101,27 +101,6 @@ describe("MapComponent", () => {
                 bubbles: true,
                 clientX: 40,
                 clientY: 30,
-                composed: true,
-                pointerId: 7,
-                pointerType: "touch"
-            }));
-
-            assertSame(events.length, 1);
-            element.remove();
-        });
-
-        it("lets overlays stop pointer events before they reach the map", () => {
-            const component = createComponent();
-            const element = component.getElement();
-            const marker = document.createElement("a");
-            marker.addEventListener("pointerdown", event => event.stopPropagation());
-            element.append(marker);
-            document.body.append(element);
-            const events: Array<HTMLElementEventMap["map-pointerdown"]> = [];
-            element.addEventListener("map-pointerdown", event => events.push(event));
-
-            marker.dispatchEvent(new PointerEvent("pointerdown", {
-                bubbles: true,
                 composed: true,
                 pointerId: 7,
                 pointerType: "touch"
@@ -167,6 +146,32 @@ describe("MapComponent", () => {
             assertSame(events.length, 1);
             assertEquals(events[0]?.viewportPoint, { x: 100, y: 75 });
             assertSame(originalEvent.defaultPrevented, true);
+            element.remove();
+        });
+
+        it("leaves wheel events in marked HTML overlay subtrees untouched", () => {
+            resetAnimationFrames();
+            const component = createComponent();
+            const element = component.getElement();
+            const editor = document.createElement("div");
+            editor.setAttribute("data-etchmap-wheel", "");
+            const textarea = document.createElement("textarea");
+            editor.append(textarea);
+            element.append(editor);
+            document.body.append(element);
+            const events: Array<HTMLElementEventMap["map-wheel"]> = [];
+            element.addEventListener("map-wheel", event => events.push(event));
+            const originalEvent = new WheelEvent("wheel", {
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+                deltaY: -100
+            });
+
+            textarea.dispatchEvent(originalEvent);
+
+            assertSame(events.length, 0);
+            assertSame(originalEvent.defaultPrevented, false);
             element.remove();
         });
     });

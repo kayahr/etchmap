@@ -158,7 +158,6 @@ Direct children of `<kayahr-map>` are slotted into its HTML overlay layer and po
     border-radius: 50%;
     background: #d71920;
     box-shadow: 0 2px 6px rgb(0 0 0 / 45%);
-    pointer-events: none;
     transform: translate(-50%, -50%);
   }
 </style>
@@ -169,3 +168,23 @@ Direct children of `<kayahr-map>` are slotted into its HTML overlay layer and po
 ```
 
 The 12 CSS pixel projection margin keeps the marker visible until it has moved completely beyond the viewport edge. Keeping offscreen elements hidden also avoids assigning potentially very large projected coordinates to CSS properties.
+
+Slotted overlays are click-through by default, so dragging an ordinary marker still pans the map. Give an overlay or selected descendants `pointer-events: auto` when they need to receive links, buttons or other pointer input:
+
+```css
+.map-control :is(a, button, input, textarea) {
+  pointer-events: auto;
+}
+```
+
+Wheel input still zooms the map when it bubbles from an interactive overlay. Add the boolean `data-etchmap-wheel` attribute when an element or complete subtree uses wheel input itself. EtchMap then leaves these native wheel events untouched, allowing controls such as a textarea or scrollable panel to retain their normal wheel behavior:
+
+```html
+<textarea class="notes" data-etchmap-wheel></textarea>
+```
+
+```css
+.notes {
+  pointer-events: auto;
+}
+```
