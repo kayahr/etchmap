@@ -51,8 +51,8 @@
         "test:apidoc": "typedoc --emit none",
         "test:spell": "cspell --no-progress --no-summary",
         "apidoc": "run apidoc:*",
-        "apidoc:demo": "node src/demo/esbuild.js",
         "apidoc:typedoc": "typedoc",
+        "apidoc:demo": "node src/demo/esbuild.js",
         "prepare": "run clean build"
     },
     "devDependencies": {
