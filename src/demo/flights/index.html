@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flights demo</title>
+    <link rel="icon" href="data:,">
+    <script src="../../../lib/importmap.js"></script>
+    <script src="../../../lib/demo/flights/demo.js" type="module"></script>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      html,
+      body,
+      kayahr-map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        overflow: hidden;
+        background: #030c18;
+      }
+
+      kayahr-map {
+        background: #030c18;
+      }
+
+      .hud {
+        top: 1rem;
+        left: 1rem;
+        width: min(48rem, calc(100vw - 2rem));
+        box-sizing: border-box;
+        padding: 0.85rem 1rem 0.95rem;
+        border: 1px solid rgb(125 211 252 / 42%);
+        border-radius: 0.25rem;
+        color: #d7f4ff;
+        background: rgb(3 12 24 / 84%);
+        box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 30%);
+        font-family: ui-monospace, "Cascadia Mono", "Courier New", monospace;
+        pointer-events: none;
+        backdrop-filter: blur(0.35rem);
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem 1.35rem;
+        margin-top: 0.6rem;
+        color: #94a3b8;
+        font-size: 0.65rem;
+        letter-spacing: 0.07em;
+      }
+
+      .legend span::before {
+        display: inline-block;
+        width: 1.35rem;
+        height: 2px;
+        margin-right: 0.4rem;
+        background: var(--route-color);
+        box-shadow: 0 0 0.4rem var(--route-color);
+        content: "";
+        vertical-align: middle;
+      }
+
+      .airliner {
+        --color: #38bdf8;
+        --route-color: #2a8eba;
+      }
+
+      .concorde {
+        --color: #fbbf24;
+        --route-color: #bc8f1b;
+      }
+
+      .scramjet {
+        --color: #f43fdb;
+        --route-color: #b72fa4;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem 1.25rem;
+        margin-top: 0.75rem;
+        pointer-events: auto;
+      }
+
+      .control {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+
+      .control-label {
+        color: #64748b;
+        font-size: 0.6rem;
+        letter-spacing: 0.1em;
+      }
+
+      .control-buttons {
+        display: flex;
+        gap: 0.2rem;
+      }
+
+      button {
+        min-width: 2.25rem;
+        padding: 0.25rem 0.4rem;
+        border: 1px solid rgb(125 211 252 / 28%);
+        border-radius: 0.18rem;
+        color: #94a3b8;
+        background: rgb(15 33 49 / 76%);
+        font: 0.65rem/1 ui-monospace, "Cascadia Mono", "Courier New", monospace;
+        font-variant-numeric: tabular-nums;
+        cursor: pointer;
+      }
+
+      button:hover,
+      button:focus-visible {
+        border-color: #7dd3fc;
+        color: white;
+        outline: none;
+      }
+
+      button.selected {
+        border-color: #38bdf8;
+        color: #e0f7ff;
+        background: rgb(14 116 144 / 52%);
+        box-shadow: inset 0 0 0.45rem rgb(56 189 248 / 18%);
+      }
+
+      .fps {
+        bottom: 1rem;
+        left: 1rem;
+        padding: 0.4rem 0.55rem;
+        border-radius: 0.2rem;
+        color: #7dd3fc;
+        background: rgb(3 12 24 / 78%);
+        font: 0.75rem/1 ui-monospace, "Cascadia Mono", "Courier New", monospace;
+        font-variant-numeric: tabular-nums;
+        pointer-events: none;
+      }
+
+      @media (width <= 760px) {
+        .hud {
+          right: 0.75rem;
+          left: 0.75rem;
+          width: auto;
+        }
+
+        .controls {
+          gap: 0.45rem 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <kayahr-map center-x="10" center-y="20" zoom="4" cache-size="768">
+      <section class="hud" aria-label="Flight simulation status">
+        <div class="legend">
+          <span class="airliner">AIRLINER</span>
+          <span class="concorde">CONCORDE</span>
+          <span class="scramjet">SCRAMJET</span>
+        </div>
+        <div class="controls">
+          <div class="control" role="group" aria-label="Aircraft count">
+            <span class="control-label">AIRCRAFT</span>
+            <div class="control-buttons">
+              <button type="button" data-flight-count="1" aria-pressed="false">1</button>
+              <button type="button" data-flight-count="10" aria-pressed="false">10</button>
+              <button class="selected" type="button" data-flight-count="100" aria-pressed="true">100</button>
+              <button type="button" data-flight-count="500" aria-pressed="false">500</button>
+              <button type="button" data-flight-count="1000" aria-pressed="false">1000</button>
+            </div>
+          </div>
+          <div class="control" role="group" aria-label="Time factor">
+            <span class="control-label">TIME</span>
+            <div class="control-buttons">
+              <button type="button" data-time-factor="1" aria-pressed="false">×1</button>
+              <button type="button" data-time-factor="10" aria-pressed="false">×10</button>
+              <button class="selected" type="button" data-time-factor="100" aria-pressed="true">×100</button>
+              <button type="button" data-time-factor="1000" aria-pressed="false">×1000</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <output class="fps">MEASURING FPS...</output>
+    </kayahr-map>
+  </body>
+</html>

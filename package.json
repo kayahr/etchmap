@@ -1,0 +1,71 @@
+{
+    "$schema": "https://json.schemastore.org/package",
+    "name": "@kayahr/map",
+    "version": "0.1.0",
+    "type": "module",
+    "description": "A small dependency-free browser library for smooth interactive raster-tile maps",
+    "keywords": [
+        "browser",
+        "canvas",
+        "custom-element",
+        "dependency-free",
+        "javascript",
+        "map",
+        "mapping",
+        "openstreetmap",
+        "raster-tiles",
+        "slippy-map",
+        "typescript",
+        "web-component",
+        "web-mapping",
+        "web-mercator",
+        "xyz-tiles"
+    ],
+    "license": "MIT",
+    "author": "Klaus Reimer <k@ailis.de>",
+    "repository": "github:kayahr/map",
+    "homepage": "https://github.com/kayahr/map",
+    "bugs": "https://github.com/kayahr/map/issues",
+    "funding": "https://github.com/kayahr/map?sponsor=1",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "lib/main/",
+        "src/main/"
+    ],
+    "exports": {
+        ".": "./lib/main/index.js"
+    },
+    "allowScripts": {
+       "esbuild": false
+    },
+    "scripts": {
+        "clean": "rm -rf lib",
+        "build": "run build:*",
+        "build:importmap": "importmap lib/importmap.js",
+        "build:compile": "tsc",
+        "test": "run test:*",
+        "test:unit": "ntest",
+        "test:lint": "oxlint --type-aware --deny-warnings",
+        "test:apidoc": "typedoc --emit none",
+        "test:spell": "cspell --no-progress --no-summary",
+        "apidoc": "run apidoc:typedoc apidoc:demo",
+        "apidoc:demo": "node src/demo/esbuild.js",
+        "apidoc:typedoc": "typedoc",
+        "prepare": "run clean build"
+    },
+    "devDependencies": {
+        "@happy-dom/global-registrator": "20.11.6",
+        "@kayahr/assert": "1.5.0",
+        "@kayahr/cspell": "10.0.1-bundle.2",
+        "@kayahr/importmap": "0.1.0",
+        "@kayahr/npm-utils": "1.1.2",
+        "@kayahr/ntest": "1.3.0",
+        "@kayahr/oxlint-config": "1.40.0",
+        "@kayahr/typedoc": "0.28.20-bundle.1",
+        "@types/node": "26.2.0",
+        "esbuild": "0.28.2",
+        "typescript": "7.0.2"
+    }
+}
