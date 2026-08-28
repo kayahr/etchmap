@@ -38,7 +38,7 @@
         ".": "./lib/main/index.js"
     },
     "allowScripts": {
-       "esbuild": false
+        "esbuild": false
     },
     "scripts": {
         "clean": "rm -rf lib",
