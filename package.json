@@ -56,7 +56,7 @@
         "prepare": "run clean build"
     },
     "devDependencies": {
-        "@happy-dom/global-registrator": "20.11.12",
+        "@happy-dom/global-registrator": "20.12.0",
         "@kayahr/assert": "1.5.0",
         "@kayahr/cspell": "10.0.1-bundle.2",
         "@kayahr/importmap": "0.1.0",
